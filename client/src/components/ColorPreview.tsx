@@ -9,6 +9,7 @@ const ColorPreview = ({
   size?: number;
   style?: any;
 }) => {
+  // Only render valid colors
   const isValidHex = colorValidation(color);
   const placeholderColor = 'rgba(255,255,255, 0.1)';
 
