@@ -64,3 +64,4 @@ For the server, it has two core parts routes and repo. The purpose of this syste
 
 - Can color be any value other than hexcode?
 - What data validation is needed?
+- What does the responsive design look like?
