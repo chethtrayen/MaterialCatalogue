@@ -17,6 +17,7 @@ const MaterialCatalogActions = ({
   materialData,
   setCurrentId
 }: MaterialCatalogActionsProps) => {
+  // Temp Id to store material on the client
   const [tempId, setTempId] = useState(-1);
 
   const addNewMaterial = () => {

@@ -38,43 +38,58 @@ const MaterialCatalog = () => {
     getMaterials();
   }, [getMaterials]);
 
+  const saveMatieral = async () => {
+    const {
+      data: { success, newId }
+    } = await api.post('/material', { ...materialData });
+
+    if (success) {
+      // Insert new data into form and list
+      setMaterialData((md: IMaterial) => ({ ...md, id: newId }));
+      setMaterialList((ml: IMaterial[]) =>
+        ml.map((item: IMaterial) =>
+          item.id === materialData.id ? { ...materialData, id: newId } : item
+        )
+      );
+    }
+  };
+
+  const updateMaterial = async () => {
+    const {
+      data: { success }
+    } = await api.put('/material', { ...materialData });
+    if (success) {
+      // Update the material in the list
+      setMaterialList((ml: IMaterial[]) =>
+        ml.map((item: IMaterial) =>
+          item.id === materialData.id ? materialData : item
+        )
+      );
+    }
+  };
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const saveFormData = async () => {
-    if (materialData.id && currentId !== materialData.id) {
+  const saveData = async () => {
+    if (!materialData.id) return;
+
+    // Prevent create/update on material selection change
+    if (currentId !== materialData.id) {
       setCurrentId(materialData.id);
       return;
     }
 
-    if (materialData.id && materialData.id < 0) {
-      const {
-        data: { success, newId }
-      } = await api.post('/material', { ...materialData });
-
-      if (success) {
-        setMaterialData((md: IMaterial) => ({ ...md, id: newId }));
-        setMaterialList((ml: IMaterial[]) =>
-          ml.map((item: IMaterial) =>
-            item.id === materialData.id ? { ...materialData, id: newId } : item
-          )
-        );
-      }
+    // Save material when using a temp id
+    if (materialData.id < 0) {
+      await saveMatieral();
     } else {
-      const {
-        data: { success }
-      } = await api.put('/material', { ...materialData });
-      if (success) {
-        setMaterialList((ml: IMaterial[]) =>
-          ml.map((item: IMaterial) =>
-            item.id === materialData.id ? materialData : item
-          )
-        );
-      }
+      await updateMaterial();
     }
   };
 
   useEffect(() => {
     const { color, name, cost, deliveryDate, volume } = materialData;
 
+    // Validate data before triggering debounce
     if (
       !colorValidation(color) ||
       !stringValidation(name) ||
@@ -93,7 +108,8 @@ const MaterialCatalog = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [materialData]);
 
-  const watchForm = useMemo(() => debounce(saveFormData, 500), [saveFormData]);
+  // Debounce to track form changes
+  const watchForm = useMemo(() => debounce(saveData, 500), [saveData]);
 
   return (
     <div className="materialCatalogContainer">
